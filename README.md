@@ -1,4 +1,4 @@
-Monitor de Indicadores Econômicos
+**Monitor de Indicadores Econômicos**
 
 Pipeline de coleta e análise de indicadores econômicos brasileiros (IPCA, Selic e dólar), com coleta automatizada em Python, armazenamento e cálculos em SQL Server e visualização em Power BI (em desenvolvimento).
 
@@ -6,7 +6,7 @@ Este é o segundo projeto do meu portfólio de transição para a área de Anál
 
 Período coberto: nov/2017 a set/2026 · séries mensais.
 
-Objetivo
+**Objetivo**
 
 Acompanhar a relação entre inflação, juros e câmbio e responder:
 
@@ -19,7 +19,8 @@ Python	Consumo de API com requests, tratamento com pandas, gravação no SQL Ser
 SQL	Pivotamento com MAX(CASE WHEN ...), funções de janela (OVER, ROWS BETWEEN), acumulado de taxas com EXP(SUM(LOG(...))), CTE, views
 Qualidade de dados	Exclusão do mês em andamento, acumulados calculados só com 12 meses completos, validação contra a fonte original
 Resolução de problemas	Migração da fonte de dados quando a API original ficou indisponível
-Fonte dos dados
+
+**Fonte dos dados**
 
 Os dados vêm da API do Ipeadata (Instituto de Pesquisa Econômica Aplicada), que republica as séries oficiais:
 
@@ -28,9 +29,9 @@ IPCA – variação mensal	PRECOS12_IPCAG12	% no mês
 Selic – taxa mensal	BM12_TJOVER12	% no mês
 Dólar comercial – venda, média do mês	BM12_ERC12	R$
 
-Por que Ipeadata e não o Banco Central? O projeto foi planejado para usar a API SGS do Banco Central. Durante o desenvolvimento, ela ficou inacessível (o domínio não era encontrado nem pela rede móvel). Migrei a coleta para o Ipeadata e conferi que os valores mensais do IPCA são idênticos aos que a API do Banco Central publicava. Detalhes em docs/problemas_e_solucoes.md.
+**Por que Ipeadata e não o Banco Central?** O projeto foi planejado para usar a API SGS do Banco Central. Durante o desenvolvimento, ela ficou inacessível (o domínio não era encontrado nem pela rede móvel). Migrei a coleta para o Ipeadata e conferi que os valores mensais do IPCA são idênticos aos que a API do Banco Central publicava. Detalhes em docs/problemas_e_solucoes.md.
 
-Estrutura do repositório
+**Estrutura do repositório**
 monitor-indicadores-economicos/
 ├── README.md
 ├── requirements.txt
@@ -42,8 +43,8 @@ monitor-indicadores-economicos/
 │   └── 02_criar_views.sql
 └── docs/
     └── problemas_e_solucoes.md
-Pipeline passo a passo
-Etapa 1 — Criar o banco
+**Pipeline passo a passo**
+**Etapa 1 — Criar o banco**
 
 sql/01_criar_banco.sql
 
@@ -51,7 +52,7 @@ sql
 IF DB_ID('Indicadores') IS NULL
     CREATE DATABASE Indicadores;
 GO
-Etapa 2 — Coleta em Python
+**Etapa 2 — Coleta em Python**
 
 python/coleta_bcb.py
 
@@ -59,7 +60,7 @@ O script consulta a API do Ipeadata para cada série, mantém os últimos 9 anos
 
 Resultado: 321 linhas (cerca de 107 meses por indicador).
 
-Etapa 3 — Views de análise
+**Etapa 3 — Views de análise**
 
 sql/02_criar_views.sql
 
@@ -83,9 +84,9 @@ Execute sql/02_criar_views.sql.
 Consulte o resultado:
 sql
    SELECT TOP 12 * FROM dbo.vw_indicadores_12m ORDER BY mes DESC;
-Resultados
+**Resultados**
 
-Último mês com todos os indicadores disponíveis: agosto/2026.
+**Último mês com todos os indicadores disponíveis: agosto/2026.**
 
 Indicador	Valor
 IPCA acumulado em 12 meses	4,22%
@@ -100,7 +101,7 @@ Próximos passos
  Power BI + DAX — dashboard com IPCA 12m × Selic 12m, juro real por ano e evolução do dólar.
  Power Automate — fluxo que roda a coleta e envia alerta por e-mail quando o IPCA 12m passa do teto da meta.
  Carga incremental — gravar apenas os meses novos, em vez de recriar a tabela a cada execução.
-Referências
+**Referências**
 Ipeadata
 Documentação OVER (funções de janela) — Microsoft
 pandas to_sql
@@ -112,4 +113,4 @@ GitHub: @cainaq
 LinkedIn: linkedin.com/in/seu-usuario
 Licença
 
-Este projeto está sob a licença MIT. Consulte o arquivo LICENSE para mais detalhes.
+**Este projeto está sob a licença MIT. Consulte o arquivo LICENSE para mais detalhes.**
