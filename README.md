@@ -6,7 +6,7 @@ Este é o segundo projeto do meu portfólio de transição para a área de Anál
 
 Período coberto: nov/2017 a set/2026 · séries mensais.
 
-![Texto alternativo para a imagem](images/painel.png)
+![Texto alternativo para a imagem](images/painelmonitor.png)
 
 Objetivo
 
