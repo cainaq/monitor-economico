@@ -32,6 +32,7 @@ Dólar comercial – venda, média do mês	BM12_ERC12	R$
 **Por que Ipeadata e não o Banco Central?** O projeto foi planejado para usar a API SGS do Banco Central. Durante o desenvolvimento, ela ficou inacessível (o domínio não era encontrado nem pela rede móvel). Migrei a coleta para o Ipeadata e conferi que os valores mensais do IPCA são idênticos aos que a API do Banco Central publicava. Detalhes em docs/problemas_e_solucoes.md.
 
 **Estrutura do repositório**
+```
 monitor-indicadores-economicos/
 ├── README.md
 ├── requirements.txt
@@ -43,8 +44,11 @@ monitor-indicadores-economicos/
 │   └── 02_criar_views.sql
 └── docs/
     └── problemas_e_solucoes.md
+
+```
+
 **Pipeline passo a passo**
-**Etapa 1 — Criar o banco**
+```Etapa 1 — Criar o banco```
 
 sql/01_criar_banco.sql
 
@@ -52,15 +56,16 @@ sql
 IF DB_ID('Indicadores') IS NULL
     CREATE DATABASE Indicadores;
 GO
-**Etapa 2 — Coleta em Python**
-
+```
+Etapa 2 — Coleta em Python
+```
 python/coleta_bcb.py
 
 O script consulta a API do Ipeadata para cada série, mantém os últimos 9 anos, padroniza as colunas (data, valor, indicador) e grava tudo na tabela dbo.indicadores.
 
 Resultado: 321 linhas (cerca de 107 meses por indicador).
 
-**Etapa 3 — Views de análise**
+```Etapa 3 — Views de análise```
 
 sql/02_criar_views.sql
 
