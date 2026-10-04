@@ -34,7 +34,7 @@ Selic – taxa mensal	BM12_TJOVER12	% no mês
 Dólar comercial – venda, média do mês	BM12_ERC12	R$
 
 Por que Ipeadata e não o Banco Central? O projeto foi planejado para usar a API SGS do Banco Central. Durante o desenvolvimento, ela ficou inacessível (o domínio não era encontrado nem pela rede móvel). Migrei a coleta para o Ipeadata e conferi que os valores mensais do IPCA são idênticos aos que a API do Banco Central publicava. Detalhes em docs/problemas_e_solucoes.md.
-
+'''
 Estrutura do repositório
 monitor-indicadores-economicos/
 ├── README.md
@@ -57,6 +57,8 @@ monitor-indicadores-economicos/
 │   └── painel.png
 └── docs/
     └── problemas_e_solucoes.md
+
+    '''
 Pipeline passo a passo
 Ipeadata (API) → Python → SQL Server (tabela + views) → Power BI
                     ↑                    ↓
