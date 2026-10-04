@@ -1,0 +1,25 @@
+# Fluxo "Atualizar indicadores" — Power Automate Desktop
+# Exportado do editor (Ctrl+A, Ctrl+C). Senha e e-mails substituídos por marcadores.
+#
+# Etapas:
+# 1. Roda o script Python de coleta e aguarda a conclusão.
+# 2. Se o script falhar (código de saída diferente de 0), avisa e encerra o fluxo.
+# 3. Consulta o IPCA acumulado em 12 meses mais recente no SQL Server.
+# 4. Envia e-mail de alerta se o IPCA passar do teto da meta (4,5%); caso contrário, envia e-mail de status.
+
+System.RunApplication.RunApplicationAndWaitToComplete ApplicationPath: $'''C:\\caminho\\para\\python.exe''' CommandLineArguments: $'''\"C:\\caminho\\para\\monitor-indicadores-economicos\\python\\coleta_ipeadata.py\"''' WorkingDirectory: $'''C:\\caminho\\para\\monitor-indicadores-economicos\\python''' WindowStyle: System.ProcessWindowStyle.Normal Timeout: 0 ProcessId=> AppProcessId ExitCode=> AppExitCode
+IF AppExitCode <> 0 THEN
+    Display.ShowMessageDialog.ShowMessage Title: $'''Falha na coleta''' Message: $'''A coleta dos indicadores falhou. Código de saída: %AppExitCode%''' Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed
+    EXIT Code: 0 ErrorMessage: $'''Falha na coleta'''
+END
+Database.Connect.Connect ConnectionString: $'''Provider=SQLOLEDB;Data Source=localhost;Initial Catalog=Indicadores;Integrated Security=SSPI;''' Connection=> SQLConnection
+Database.ExecuteSqlStatement.Execute Connection: SQLConnection Statement: $'''SELECT TOP 1 mes, ROUND(ipca_12m, 2) AS ipca_12m
+FROM dbo.vw_indicadores_12m
+WHERE ipca_12m IS NOT NULL
+ORDER BY mes DESC;''' Timeout: 30 Result=> QueryResult
+IF QueryResult[0]['ipca_12m'] > 4.5 THEN
+    Email.SendEmail.AuthenticateAndSend SMTPServer: $'''smtp.gmail.com''' Port: 587 EnableSSL: True Username: $'''seu-email@gmail.com''' Password: $'''[SENHA_DE_APP]''' AcceptUntrustedCertificates: False SendFrom: $'''seu-email@gmail.com''' SenderDisplayName: $'''Monitor de Indicadores''' SendTo: $'''seu-email@gmail.com''' Subject: $'''Alerta: IPCA acima do teto da meta''' Body: $'''IPCA acumulado em 12 meses de %QueryResult[0]['ipca_12m']%, acima do teto da meta de 4,5 por cento.''' IsBodyHtml: False
+ELSE
+    Email.SendEmail.AuthenticateAndSend SMTPServer: $'''smtp.gmail.com''' Port: 587 EnableSSL: True Username: $'''seu-email@gmail.com''' Password: $'''[SENHA_DE_APP]''' AcceptUntrustedCertificates: False SendFrom: $'''seu-email@gmail.com''' SenderDisplayName: $'''Monitor de Indicadores''' SendTo: $'''seu-email@gmail.com''' Subject: $'''IPCA dentro da meta''' Body: $'''IPCA acumulado em 12 meses de %QueryResult[0]['ipca_12m']%, dentro da meta.''' IsBodyHtml: False
+END
+Database.Close Connection: SQLConnection
