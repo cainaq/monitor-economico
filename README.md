@@ -1,4 +1,4 @@
-Monitor de Indicadores Econômicos
+**Monitor de Indicadores Econômicos**
 
 Pipeline de coleta, análise e monitoramento de indicadores econômicos brasileiros (IPCA, Selic e dólar): coleta automatizada em Python, armazenamento e cálculos em SQL Server, dashboard em Power BI e alerta por e-mail com Power Automate.
 
@@ -8,7 +8,7 @@ Período coberto: nov/2017 a set/2026 · séries mensais.
 
 ![Texto alternativo para a imagem](images/painelmonitor.png)
 
-Objetivo
+**Objetivo**
 
 Acompanhar a relação entre inflação, juros e câmbio e responder:
 
@@ -26,7 +26,7 @@ Qualidade de dados	Exclusão do mês em andamento, acumulados só com 12 meses c
 Resolução de problemas	Migração da fonte de dados quando a API original ficou indisponível
 Fonte dos dados
 
-Os dados vêm da API do Ipeadata (Instituto de Pesquisa Econômica Aplicada), que republica as séries oficiais:
+**Os dados vêm da API do Ipeadata (Instituto de Pesquisa Econômica Aplicada), que republica as séries oficiais:**
 
 Indicador	Código Ipeadata	Unidade
 IPCA – variação mensal	PRECOS12_IPCAG12	% no mês
@@ -34,8 +34,10 @@ Selic – taxa mensal	BM12_TJOVER12	% no mês
 Dólar comercial – venda, média do mês	BM12_ERC12	R$
 
 Por que Ipeadata e não o Banco Central? O projeto foi planejado para usar a API SGS do Banco Central. Durante o desenvolvimento, ela ficou inacessível (o domínio não era encontrado nem pela rede móvel). Migrei a coleta para o Ipeadata e conferi que os valores mensais do IPCA são idênticos aos que a API do Banco Central publicava. Detalhes em docs/problemas_e_solucoes.md.
-'''
-Estrutura do repositório
+
+```
+**Estrutura do repositório**
+
 monitor-indicadores-economicos/
 ├── README.md
 ├── LICENSE
@@ -57,13 +59,16 @@ monitor-indicadores-economicos/
 │   └── painel.png
 └── docs/
     └── problemas_e_solucoes.md
-
-    '''
+ ```
+ ```
 Pipeline passo a passo
+
 Ipeadata (API) → Python → SQL Server (tabela + views) → Power BI
                     ↑                    ↓
-              Power Automate ← consulta o IPCA 12m → e-mail
-Etapa 1 — Criar o banco
+              Power Automate ← consulta o IPCA 12m → e-mail 
+ ```
+ 
+**Etapa 1 — Criar o banco**
 
 sql/01_criar_banco.sql
 
@@ -71,7 +76,7 @@ sql
 IF DB_ID('Indicadores') IS NULL
     CREATE DATABASE Indicadores;
 GO
-Etapa 2 — Coleta em Python
+**Etapa 2 — Coleta em Python**
 
 python/coleta_ipeadata.py
 
@@ -82,7 +87,7 @@ Proteção dos dados: o script só grava depois de baixar todas as séries. Se a
 
 Resultado: 321 linhas (cerca de 107 meses por indicador).
 
-Etapa 3 — Views de análise
+**Etapa 3 — Views de análise**
 
 sql/02_criar_views.sql
 
@@ -91,14 +96,14 @@ vw_indicadores_12m — calcula, com funções de janela:
 IPCA 12m e Selic 12m: taxas acumuladas nos últimos 12 meses. Como taxas se acumulam multiplicando (1 + taxa), o cálculo usa EXP(SUM(LOG(1 + taxa))).
 Juro real 12m: (1 + Selic 12m) / (1 + IPCA 12m) − 1.
 Os acumulados só aparecem quando há 12 meses completos; caso contrário, ficam vazios em vez de mostrar um valor errado.
-Etapa 4 — Dashboard no Power BI
+**Etapa 4 — Dashboard no Power BI**
 
 powerbi/monitor_indicadores.pbix
 
 Conectado à vw_indicadores_12m, com tabela calendário criada em Linguagem M.
 Como o SQL já calcula os acumulados, as medidas DAX buscam o último mês com valor dentro do filtro aplicado. O mesmo cálculo serve para os cartões (valor mais recente), para os gráficos (valor de cada mês) e para o filtro de ano (último mês do ano escolhido).
 Cada cartão mostra o mês de referência do seu indicador, porque as séries têm atrasos de divulgação diferentes (o IPCA sai cerca de 10 dias depois do fim do mês).
-Etapa 5 — Automação com Power Automate Desktop
+**Etapa 5 — Automação com Power Automate Desktop**
 
 automacao/fluxo_atualizar_indicadores.txt
 
@@ -111,9 +116,11 @@ Compara com o teto da meta de inflação (4,5%) e envia um e-mail pelo Gmail:
 acima do teto: "Alerta: IPCA acima do teto da meta";
 dentro da meta: "IPCA dentro da meta", com o valor atual.
 
-Mostrar Imagem
+![Fluxo no Power Automate](automacao/fluxo.png)
+![E-mail recebido](automacao/email_recebido.png)
 
-Mostrar Imagem
+
+
 
 Sobre a execução: na versão gratuita do Power Automate Desktop, o fluxo é iniciado manualmente (botão Executar). O agendamento automático exige licença paga.
 
